@@ -1,0 +1,52 @@
+[package]
+name = "test-provider"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+description = "A provider that does what it is told, for tests: behaviours as data, an in-process and an HTTP transport."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/paoValle/test-provider"
+keywords = ["testing", "llm", "mock", "provider"]
+categories = ["development-tools::testing"]
+
+[dependencies]
+# `serde_json`, not hand-written bodies: the first copy of this code had four escaped closing
+# braces in a row and one too few, which is exactly the bug this crate exists to stop repeating.
+serde_json = "1"
+
+[dependencies.axum]
+version = "0.8"
+features = ["json", "tokio", "http1"]
+optional = true
+
+[dependencies.tokio]
+version = "1"
+features = ["rt-multi-thread", "macros", "net"]
+optional = true
+
+[features]
+default = []
+# The HTTP transport. Off by default: a unit test that only needs the behaviours in process
+# should not pull a web framework in.
+http = ["dep:axum", "dep:tokio"]
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+missing_debug_implementations = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+# The same allowances as the repositories that depend on this crate: the tests here are
+# allowed to unwrap, because a panic in a test is a failure with a line number.
+unwrap_used = "allow"
+expect_used = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
