@@ -3,7 +3,7 @@
 Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning [SemVer](https://semver.org/).
 
-## [Unreleased]
+## [0.1.1] - 2026-10-09
 
 ### Fixed
 - `Behavior::Ok` echoes the requested model, as the changelog and the README always claimed. The
