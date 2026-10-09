@@ -5,6 +5,11 @@ versioning [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- `Behavior::Ok` echoes the requested model, as the changelog and the README always claimed. The
+  echo covered `Responds` only, so the one consumer that builds its body from `Ok` (`llmlab`, over a
+  real socket) recorded `model: "unknown"` and its replay stopped matching the original run.
+
 ## [0.1.0] - 2026-10-07
 
 First version: the behaviours and the two transports, extracted because three hand-written copies of

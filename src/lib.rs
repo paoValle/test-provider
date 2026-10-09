@@ -27,7 +27,8 @@ use std::sync::Mutex;
 /// "always unavailable" is one entry and not a number.
 #[derive(Debug, Clone)]
 pub enum Behavior {
-    /// A `200` whose body carries this completion and this usage.
+    /// A `200` whose body carries this completion and this usage, with the requested model
+    /// echoed into it like in every other JSON response.
     Ok {
         /// The text of the completion.
         content: String,
@@ -181,7 +182,10 @@ impl Provider {
                 completion_tokens,
             } => Answer::Responded {
                 status: 200,
-                body: usage_body(&content, prompt_tokens, completion_tokens),
+                body: echo_model(
+                    &usage_body(&content, prompt_tokens, completion_tokens),
+                    model.as_deref(),
+                ),
             },
             Behavior::Responds { status, body } => Answer::Responded {
                 status,

@@ -44,18 +44,24 @@ fn an_ok_behavior_carries_the_usage_the_gateway_meters() {
 #[test]
 fn every_response_echoes_the_model_the_request_asked_for() {
     // the behavior that drifted between the copies: a real provider echoes the model, and without
-    // the echo a recorded run says "unknown" and stops replaying
-    let provider = Provider::always(Behavior::Responds {
-        status: 200,
-        body: r#"{"choices":[{"message":{"content":"hi"}}]}"#.to_owned(),
-    });
-    let Answer::Responded { body, .. } = provider.answer(REQUEST.as_bytes()) else {
-        panic!("expected a response");
-    };
+    // the echo a recorded run says "unknown" and stops replaying. `Ok` builds its own body, so it
+    // is the one that forgot the echo — which is what a lab over the wire noticed first
+    for behavior in [
+        Behavior::Responds {
+            status: 200,
+            body: r#"{"choices":[{"message":{"content":"hi"}}]}"#.to_owned(),
+        },
+        Behavior::usage("hi", 12, 7),
+    ] {
+        let provider = Provider::always(behavior);
+        let Answer::Responded { body, .. } = provider.answer(REQUEST.as_bytes()) else {
+            panic!("expected a response");
+        };
 
-    let value: serde_json::Value = serde_json::from_str(&body).expect("body is JSON");
-    assert_eq!(value["model"], "gpt-4o-mini");
-    assert_eq!(provider.models(), vec!["gpt-4o-mini".to_owned()]);
+        let value: serde_json::Value = serde_json::from_str(&body).expect("body is JSON");
+        assert_eq!(value["model"], "gpt-4o-mini", "in {body}");
+        assert_eq!(provider.models(), vec!["gpt-4o-mini".to_owned()]);
+    }
 }
 
 #[test]
